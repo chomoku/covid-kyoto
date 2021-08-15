@@ -9,6 +9,7 @@ from dash.dependencies import Input, Output, State
 
 from datetime import date
 from datetime import datetime
+import os
 
 # データを京都府のサイトからとっていた際のコード
 # age_dict = {
@@ -126,6 +127,8 @@ app = dash.Dash(
         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"}
     ],
 )
+
+server = app.server
 
 app.layout = html.Div(
     [
