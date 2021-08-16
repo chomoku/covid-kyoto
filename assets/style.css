@@ -24,11 +24,17 @@
         margin: 5%;
     }
     .total_style {
-        margin: 5%;
+        margin: 2%;
     }
     .first-row {
         background-color: lightgreen;
         border-radius: 2%;
+        margin: 3%;
+    }
+    .time_series {
+        background-color: lightgreen;
+        border-radius: 2%;
+        margin: 3%;
     }
     body {
         background-color: white;

@@ -1,3 +1,4 @@
+from pandas.core.indexes import multi
 import dash
 import dash_html_components as html
 import dash_core_components as dcc
@@ -10,34 +11,6 @@ from dash.dependencies import Input, Output, State
 from datetime import date
 from datetime import datetime
 import os
-
-# データを京都府のサイトからとっていた際のコード
-# age_dict = {
-#     "10未満": "10代未満",
-#     "10": "10代",
-#     "20": "20代",
-#     "30": "30代",
-#     "40": "40代",
-#     "50": "50代",
-#     "60": "60代",
-#     "70": "70代",
-#     "80": "80代",
-#     "90": "90代",
-#     "90以上": "90代以上",
-#     "-": "不明",
-# }
-
-# df = pd.read_html("https://www.pref.kyoto.jp/kentai/corona/hassei1-50.html")[1]
-# today = df["発表日"][0]
-
-# df_new = df[df["発表日"] == today]
-# df_count = pd.DataFrame(df_new["年代"].value_counts())
-# df_count.columns = ["人数"]
-# df_count = df_count.reset_index()
-# df_count["年代"] = df_count["index"].map(age_dict)
-
-# total = df_count["人数"].sum()
-
 
 def draw_circle(df: pd.DataFrame, total: int, today: str) -> go.Figure:
     """
@@ -88,9 +61,11 @@ aged_df = pd.DataFrame(df[['date', 'age']].value_counts())
 aged_df.columns = ['counts']
 aged_df = aged_df.reset_index()
 
-aged_fig = px.bar(aged_df, x='date', y='counts', color='age')
-aged_fig.update_layout(
-    xaxis=dict(
+
+def draw_line(df):
+    aged_fig = px.line(df, x='date', y='counts', color='age')
+    aged_fig.update_layout(
+        xaxis=dict(
         rangeselector=dict(
             buttons=list([
                 dict(count=1,
@@ -116,10 +91,11 @@ aged_fig.update_layout(
             visible=True
         ),
         type="date"
+        )
     )
-)
+    return aged_fig
 
-test_fig = draw_circle(new_counts, new_total, new_date)
+new_fig = draw_circle(new_counts, new_total, new_date)
 
 app = dash.Dash(
     __name__,
@@ -130,6 +106,9 @@ app = dash.Dash(
 )
 
 server = app.server
+
+app.title = "合同会社 長目"
+
 
 app.layout = html.Div(
     [
@@ -144,7 +123,7 @@ app.layout = html.Div(
                 html.Div([
                 dcc.Graph(
                     id="latest_graph",
-                    figure=test_fig,
+                    figure=new_fig,
                     
                 ),
                 ], className='latest_graph',),
@@ -172,15 +151,20 @@ app.layout = html.Div(
         ], className="first-row"),
         html.Div([
             html.H3('年齢別感染者数（時系列）'),
-            dcc.Graph(figure=aged_fig, style={'height': 500})
-        ])
+
+            dcc.Dropdown(id='age_dropdown',
+                options=[{'value': age, 'label': age} for age in aged_df['age'].unique()],
+                multi=True,
+                value=['10代未満', '10代', '20代', '30代'],
+            ),
+            dcc.Graph(id='aged_graph', style={'height': 500,})
+        ], className='time_series', style={'padding': '3%'}),
     ],className="total_style"
 )
 
 
 @app.callback(
     Output('second_graph', 'figure'),
-
     Input('datepicker', 'date')
 )
 def update_circle(selected_date):
@@ -188,6 +172,18 @@ def update_circle(selected_date):
     selected_df, sel_total = cal_counts(df, selected_datetime)
     fig = draw_circle(selected_df, sel_total, selected_datetime)
     return fig
+
+@app.callback(
+    Output('aged_graph', 'figure'),
+    Input('age_dropdown', 'value')
+)
+def update_line(selected_ages):
+    if selected_ages is None:
+        raise dash.exceptions.PreventUpdate
+    sel_df = aged_df[aged_df['age'].isin(selected_ages)]
+    sel_df = sel_df.sort_values('date')
+    return draw_line(sel_df)
+
 
 if __name__ == "__main__":
     app.run_server(debug=True)
