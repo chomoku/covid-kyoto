@@ -44,7 +44,7 @@ def draw_circle(df: pd.DataFrame, total: int, today: str) -> go.Figure:
     年代別患者数の円グラフを作成する関数
     """
     fig = go.Figure()
-    circle_size = 300 + total / 1.5 
+    circle_size = 200 + total / 1.5 
     fig.add_trace(
         go.Pie(
             labels=df["age"], values=df["counts"], textinfo="label+percent", hole=0.7
@@ -53,11 +53,12 @@ def draw_circle(df: pd.DataFrame, total: int, today: str) -> go.Figure:
     fig.update_layout(
         width=circle_size,
         height=circle_size,
-        title={"text": f"{today}", "x": 0.47, "xanchor": "center"},
+        title={"text": f"{today.date()}", "x": 0.47, "xanchor": "center"},
         annotations=[
             {"text": f"感染者数: {str(total)}", "showarrow": False, "font_size": 25}
         ],
-        showlegend=False
+        showlegend=False,
+        paper_bgcolor='lightgreen'
     )
     return fig
 
@@ -132,6 +133,7 @@ server = app.server
 
 app.layout = html.Div(
     [
+        html.Div([
         html.Div(
             [html.H1("京都コロナウィルス感染者数"), html.H2("年代別割合")],
             className="container pt-3 my-3 bg-primary text-white",
@@ -139,11 +141,13 @@ app.layout = html.Div(
         ),
         html.Div(
             [
+                html.Div([
                 dcc.Graph(
                     id="latest_graph",
                     figure=test_fig,
-                    style={"margin": "auto", "display": "inline-block", "width": "50%"},
+                    
                 ),
+                ], className='latest_graph',),
                 html.Div(
                     [
                         html.Div([
@@ -158,23 +162,19 @@ app.layout = html.Div(
                             style={'display': 'inline-block', 'verticalAlign': 'middle'}
                         )
                         ], style={'margin': '5% auto'}),
-                        dcc.Graph(id="second_graph", style={'margin': 'auto'}),
+                        dcc.Graph(id="second_graph", style={'margin': 'auto', 'width': '95%'}),
                     ],
-                    style={
-                        "display": "inline-block",
-                        "width": "50%",
-
-                        "textAlign": 'center',
-                        "verticalAlign": "top",
-                    },
+                    className='second_graph',
+                    
                 ),
             ]
         ),
+        ], className="first-row"),
         html.Div([
             html.H3('年齢別感染者数（時系列）'),
             dcc.Graph(figure=aged_fig, style={'height': 500})
         ])
-    ]
+    ],className="total_style"
 )
 
 
