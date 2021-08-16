@@ -118,6 +118,12 @@ app.layout = html.Div(
             className="container pt-3 my-3 bg-primary text-white",
             style={"textAlign": "center"},
         ),
+        html.Div([
+            dcc.Markdown("""
+            感染者数のデータは[stop-covid19-kyoto](https://github.com/stop-covid19-kyoto/covid19-kyoto)より得たものを利用しています。
+            
+            """),
+        ], style={'textAlign': 'center', 'backgroundColor': 'white'}),
         html.Div(
             [
                 html.Div([
@@ -159,6 +165,9 @@ app.layout = html.Div(
             ),
             dcc.Graph(id='aged_graph', style={'height': 500,})
         ], className='time_series', style={'padding': '3%'}),
+
+        
+        
     ],className="total_style"
 )
 
