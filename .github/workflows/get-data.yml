@@ -1,7 +1,7 @@
 name: get-kyoto-data
 on:
   schedule:
-    - cron: '45 0 * * *'
+    - cron: '52 0 * * *'
 
 jobs:
   build:
@@ -12,7 +12,7 @@ jobs:
       - name: Setup python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.8"
+          python-version: 3.8
 
       - name: install packages
         run: |
