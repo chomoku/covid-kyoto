@@ -1,7 +1,7 @@
 name: get-kyoto-data
 on:
   schedule:
-    - cron: '30 0 * * *'
+    - cron: '45 0 * * *'
 
 jobs:
   build:
