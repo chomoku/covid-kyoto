@@ -11,6 +11,7 @@ from dash.dependencies import Input, Output, State
 from datetime import date
 from datetime import datetime
 import os
+import time
 
 def draw_circle(df: pd.DataFrame, total: int, today: str) -> go.Figure:
     """
@@ -103,29 +104,14 @@ app = dash.Dash(
     meta_tags=[
         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"}
     ],
+    suppress_callback_exceptions=True
+
 )
 
 server = app.server
 
 app.title = "合同会社 長目"
-
-
-app.layout = html.Div(
-    [
-        html.Div([
-        html.Div(
-            [html.H1("京都コロナウィルス感染者数"), html.H2("年代別割合")],
-            className="container pt-3 my-3 bg-primary text-white",
-            style={"textAlign": "center"},
-        ),
-        html.Div([
-            dcc.Markdown("""
-            感染者数のデータは[stop-covid19-kyoto](https://github.com/stop-covid19-kyoto/covid19-kyoto)より得たものを利用しています。
-            
-            """),
-        ], style={'textAlign': 'center', 'backgroundColor': 'white'}),
-        dcc.Loading(children=[
-        html.Div(
+contents = html.Div([html.Div([html.Div(
             [
                 html.Div([
                 dcc.Graph(
@@ -165,9 +151,22 @@ app.layout = html.Div(
                 value=['10代未満', '10代', '20代', '30代'],
             ),
             dcc.Graph(id='aged_graph', style={'height': 500,})
-        ], className='time_series', style={'padding': '3%'}),
+        ], className='time_series', style={'padding': '3%'})
+    ])
 
-        ], loading_state={'is_loading': True}),
+app.layout = html.Div([
+        html.Div(
+            [html.H1("京都コロナウィルス感染者数"), html.H2("年代別割合")],
+            className="container pt-3 my-3 bg-primary text-white",
+            style={"textAlign": "center"},
+        ),
+        html.Div([
+            dcc.Markdown("""
+            感染者数のデータは[stop-covid19-kyoto](https://github.com/stop-covid19-kyoto/covid19-kyoto)より得たものを利用しています。
+            
+            """),
+        ], style={'textAlign': 'center', 'backgroundColor': 'white'}),
+        dcc.Loading(id='load_contents', children=contents, fullscreen=True, type='graph'),
         
     ],className="total_style"
 )
@@ -194,6 +193,13 @@ def update_line(selected_ages):
     sel_df = sel_df.sort_values('date')
     return draw_line(sel_df)
 
+# @app.callback(
+#     Output('load_contents', 'children'),
+#     Input('load_contents', 'children')
+# )
+# def load_contents(child):
+#     time.sleep(3)
+#     return contents
 
 if __name__ == "__main__":
     app.run_server(debug=True)
