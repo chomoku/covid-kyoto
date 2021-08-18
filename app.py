@@ -124,6 +124,7 @@ app.layout = html.Div(
             
             """),
         ], style={'textAlign': 'center', 'backgroundColor': 'white'}),
+        dcc.Loading(children=[
         html.Div(
             [
                 html.Div([
@@ -166,7 +167,7 @@ app.layout = html.Div(
             dcc.Graph(id='aged_graph', style={'height': 500,})
         ], className='time_series', style={'padding': '3%'}),
 
-        
+        ], loading_state={'is_loading': True}),
         
     ],className="total_style"
 )
