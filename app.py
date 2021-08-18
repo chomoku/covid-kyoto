@@ -166,7 +166,7 @@ app.layout = html.Div([
             
             """),
         ], style={'textAlign': 'center', 'backgroundColor': 'white'}),
-        dcc.Loading(id='load_contents', children=contents, fullscreen=True, type='graph'),
+        dcc.Loading(id='load_contents', children=contents, type='graph'),
         
     ],className="total_style"
 )
