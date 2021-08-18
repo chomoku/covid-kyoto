@@ -166,7 +166,7 @@ app.layout = html.Div([
             
             """),
         ], style={'textAlign': 'center', 'backgroundColor': 'white'}),
-        dcc.Loading(id='load_contents', children=contents, type='graph'),
+        html.Div(children=contents),
         
     ],className="total_style"
 )
@@ -192,14 +192,7 @@ def update_line(selected_ages):
     sel_df = aged_df[aged_df['age'].isin(selected_ages)]
     sel_df = sel_df.sort_values('date')
     return draw_line(sel_df)
-
-# @app.callback(
-#     Output('load_contents', 'children'),
-#     Input('load_contents', 'children')
-# )
-# def load_contents(child):
-#     time.sleep(3)
-#     return contents
+    
 
 if __name__ == "__main__":
     app.run_server(debug=True)
