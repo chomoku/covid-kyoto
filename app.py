@@ -18,7 +18,7 @@ def draw_circle(df: pd.DataFrame, total: int, today: str) -> go.Figure:
     年代別患者数の円グラフを作成する関数
     """
     fig = go.Figure()
-    circle_size = 150 + total / 1.1
+    circle_size = 150 + total / 1.5
     fig.add_trace(
         go.Pie(
             labels=df["age"], values=df["counts"], textinfo="label+percent", hole=0.7
