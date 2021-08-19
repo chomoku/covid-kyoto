@@ -18,7 +18,7 @@ def draw_circle(df: pd.DataFrame, total: int, today: str) -> go.Figure:
     年代別患者数の円グラフを作成する関数
     """
     fig = go.Figure()
-    circle_size = 150 + total / 1.3
+    circle_size = 150 + total / 1.1
     fig.add_trace(
         go.Pie(
             labels=df["age"], values=df["counts"], textinfo="label+percent", hole=0.7
@@ -151,7 +151,7 @@ contents = html.Div([html.Div([html.Div(
             dcc.Dropdown(id='age_dropdown',
                 options=[{'value': age, 'label': age} for age in aged_df['age'].unique()],
                 multi=True,
-                value=['10代未満', '10代', '20代', '30代'],
+                value=['10代未満', '10代'],
             ),
             dcc.Graph(id='aged_graph', style={'height': 500,})
         ], className='time_series', style={'padding': '3%'})
