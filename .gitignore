@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# file 
+get_data_from_kyoto.py
+
 # Distribution / packaging
 .Python
 build/

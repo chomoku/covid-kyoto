@@ -18,7 +18,7 @@ def draw_circle(df: pd.DataFrame, total: int, today: str) -> go.Figure:
     年代別患者数の円グラフを作成する関数
     """
     fig = go.Figure()
-    circle_size = 200 + total / 1.5 
+    circle_size = 150 + total / 1.3
     fig.add_trace(
         go.Pie(
             labels=df["age"], values=df["counts"], textinfo="label+percent", hole=0.7
@@ -32,7 +32,8 @@ def draw_circle(df: pd.DataFrame, total: int, today: str) -> go.Figure:
             {"text": f"感染者数: {str(total)}", "showarrow": False, "font_size": 25}
         ],
         showlegend=False,
-        paper_bgcolor='lightgreen'
+        paper_bgcolor='lightgreen',
+        margin=dict(l=20, r=20, t=40, b=20)
     )
     return fig
 
@@ -81,18 +82,19 @@ def draw_line(df):
                      label="6m",
                      step="month",
                      stepmode="backward"),
-                # dict(count=1,
-                #      label="1y",
-                #      step="year",
-                #      stepmode="backward"),
-                # dict(step="all")
+                dict(count=1,
+                     label="1y",
+                     step="year",
+                     stepmode="backward"),
+                dict(step="all")
             ])
         ),
         rangeslider=dict(
             visible=True
         ),
-        type="date"
-        )
+        type="date",
+        ),
+        showlegend=False
     )
     return aged_fig
 
@@ -117,6 +119,7 @@ contents = html.Div([html.Div([html.Div(
                 dcc.Graph(
                     id="latest_graph",
                     figure=new_fig,
+                    style={'margin': '10px auto'}
                     
                 ),
                 ], className='latest_graph',),
@@ -134,10 +137,10 @@ contents = html.Div([html.Div([html.Div(
                             style={'display': 'inline-block', 'verticalAlign': 'middle'}
                         )
                         ], style={'margin': '5% auto'}),
-                        dcc.Graph(id="second_graph", style={'margin': 'auto', 'width': '95%'}),
+                        dcc.Graph(id="second_graph", style={ 'width': '95%'}),
                     ],
                     className='second_graph',
-                    
+                    style={'margin': 'auto'}
                 ),
             ]
         ),
@@ -192,7 +195,7 @@ def update_line(selected_ages):
     sel_df = aged_df[aged_df['age'].isin(selected_ages)]
     sel_df = sel_df.sort_values('date')
     return draw_line(sel_df)
-    
+
 
 if __name__ == "__main__":
     app.run_server(debug=True)
