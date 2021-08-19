@@ -6,3 +6,4 @@ gunicorn
 lxml
 requests
 numpy
+requests_html
