@@ -166,7 +166,9 @@ contents = html.Div(
                     multi=True,
                     value=["10代未満", "10代"],
                 ),
+                dcc.Loading([
                 dcc.Graph(id="aged_graph", style={"height": 500,}),
+                ], fullscreen=True, type='graph'),
             ],
             className="time_series",
             style={"padding": "3%"},
