@@ -104,17 +104,20 @@ server = app.server
 app.title = "合同会社 長目"
 contents = html.Div(
     [
+        dcc.Loading([
         html.Div(
             [
                 html.Div(
                     [
                         html.Div(
                             [
+                                
                                 dcc.Graph(
                                     id="latest_graph",
                                     figure=new_fig,
                                     style={"margin": "10px auto"},
                                 ),
+                                
                             ],
                             className="latest_graph",
                         ),
@@ -154,7 +157,7 @@ contents = html.Div(
                 ),
             ],
             className="first-row",
-        ),
+        ),], fullscreen=True, type='graph'),
         html.Div(
             [
                 html.H3("年齢別感染者数（時系列）"),
@@ -166,9 +169,9 @@ contents = html.Div(
                     multi=True,
                     value=["10代未満", "10代"],
                 ),
-                dcc.Loading([
+                
                 dcc.Graph(id="aged_graph", style={"height": 500,}),
-                ], fullscreen=True, type='graph'),
+                
             ],
             className="time_series",
             style={"padding": "3%"},
