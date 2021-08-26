@@ -101,28 +101,17 @@ app = dash.Dash(
 
 server = app.server
 
-app.title = "合同会社 長目"
+app.title = "京都府　年齢別コロナウィルス感染者数"
 contents = html.Div(
     [
-        dcc.Loading([
+        
         html.Div(
             [
                 html.Div(
                     [
                         html.Div(
                             [
-                                
-                                dcc.Graph(
-                                    id="latest_graph",
-                                    figure=new_fig,
-                                    style={"margin": "10px auto"},
-                                ),
-                                
-                            ],
-                            className="latest_graph",
-                        ),
-                        html.Div(
-                            [
+                                dcc.Graph(id="second_graph", style={"width": "95%"}),
                                 html.Div(
                                     [
                                         html.P(
@@ -138,7 +127,7 @@ contents = html.Div(
                                             min_date_allowed=min_date,
                                             max_date_allowed=new_date,
                                             initial_visible_month=date(2021, 7, 1),
-                                            date=date(2021, 1, 5),
+                                            date=date(new_date.year, new_date.month, new_date.day),
                                             display_format="YYYY/M/D",
                                             style={
                                                 "display": "inline-block",
@@ -146,18 +135,15 @@ contents = html.Div(
                                             },
                                         ),
                                     ],
-                                    style={"margin": "5% auto"},
+                                    style={'width': '50%', "margin": "5% auto"},
                                 ),
-                                dcc.Graph(id="second_graph", style={"width": "95%"}),
-                            ],
-                            className="second_graph",
-                            style={"margin": "auto"},
+                            ],className="first-row",
                         ),
-                    ]
+                    ], className='first-parent'
                 ),
             ],
-            className="first-row",
-        ),], fullscreen=True, type='graph'),
+            
+        ),
         html.Div(
             [
                 html.H3("年齢別感染者数（時系列）"),
