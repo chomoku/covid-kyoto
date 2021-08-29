@@ -88,7 +88,24 @@ def draw_line(df):
     return aged_fig
 
 
+def recent_pcr_bar(
+    df: pd.DataFrame, x_axis_name: str, y_axis_name: str, title: str = None
+) -> go.Figure:
+    recent_date = df["date"].max()
+    graph_df = df[df["date"] == recent_date]
+    fig = px.bar(graph_df, x=x_axis_name, y=y_axis_name, title=title, height=450)
+    fig.update_layout(margin=dict(l=20, r=20, t=40, b=20),)
+    return fig
+
+
 new_fig = draw_circle(new_counts, new_total, new_date)
+
+deliv_data = pd.read_csv("./data/vac_forecast.csv")
+deliv_graph = recent_pcr_bar(
+    deliv_data, x_axis_name="配送期間", y_axis_name="配送数（予定を含む）", title="ワクチン配送数"
+)
+
+seshu_data = pd.read_csv("./data/vaccined_num.csv")
 
 app = dash.Dash(
     __name__,
@@ -104,7 +121,6 @@ server = app.server
 app.title = "京都府　年齢別コロナウィルス感染者数"
 contents = html.Div(
     [
-        
         html.Div(
             [
                 html.Div(
@@ -127,7 +143,11 @@ contents = html.Div(
                                             min_date_allowed=min_date,
                                             max_date_allowed=new_date,
                                             initial_visible_month=date(2021, 7, 1),
-                                            date=date(new_date.year, new_date.month, new_date.day),
+                                            date=date(
+                                                new_date.year,
+                                                new_date.month,
+                                                new_date.day,
+                                            ),
                                             display_format="YYYY/M/D",
                                             style={
                                                 "display": "inline-block",
@@ -135,14 +155,15 @@ contents = html.Div(
                                             },
                                         ),
                                     ],
-                                    style={'width': '50%', "margin": "5% auto"},
+                                    style={"width": "50%", "margin": "5% auto"},
                                 ),
-                            ],className="first-row",
+                            ],
+                            className="first-row",
                         ),
-                    ], className='first-parent'
+                    ],
+                    className="first-parent",
                 ),
             ],
-            
         ),
         html.Div(
             [
@@ -155,12 +176,30 @@ contents = html.Div(
                     multi=True,
                     value=["10代未満", "10代"],
                 ),
-                
                 dcc.Graph(id="aged_graph", style={"height": 500,}),
-                
             ],
             className="time_series",
             style={"padding": "3%"},
+        ),
+        html.Div(
+            [
+                html.Div(
+                    [
+                        dcc.Dropdown(
+                            id="num_select",
+                            options=[
+                                {"value": s, "label": s} for s in ["1回目接種率", "2回目接種率"]
+                            ],
+                            value="2回目接種率",
+                            style={"width": "80%", "margin": "auto"},
+                        ),
+                        dcc.Graph(id="seshu_graph"),
+                    ],
+                    className="pcr_data",
+                ),
+                html.Div([dcc.Graph(figure=deliv_graph)], className="pcr_data"),
+            ],
+            className="first-parent",
         ),
     ]
 )
@@ -168,7 +207,7 @@ contents = html.Div(
 app.layout = html.Div(
     [
         html.Div(
-            [html.H1("京都コロナウィルス感染者数"), html.H2("年代別割合")],
+            [html.H1("京都府コロナウィルス感染者数"), html.H2("年代別割合")],
             className="container pt-3 my-3 bg-primary text-white",
             style={"textAlign": "center"},
         ),
@@ -219,6 +258,17 @@ def update_line(selected_ages):
     sel_df = aged_df[aged_df["age"].isin(selected_ages)]
     sel_df = sel_df.sort_values("date")
     return draw_line(sel_df)
+
+
+@app.callback(Output("seshu_graph", "figure"), Input("num_select", "value"))
+def update_seshu_graph(selected_value):
+    fig = recent_pcr_bar(
+        seshu_data,
+        x_axis_name="年代",
+        y_axis_name=selected_value,
+        title=f"年代別接種率({selected_value})",
+    )
+    return fig
 
 
 if __name__ == "__main__":
