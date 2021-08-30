@@ -215,7 +215,7 @@ app.layout = html.Div(
             [
                 dcc.Markdown(
                     """
-            感染者数のデータは[stop-covid19-kyoto](https://github.com/stop-covid19-kyoto/covid19-kyoto)より得たものを利用しています。
+            
             
             """
                 ),
@@ -227,7 +227,9 @@ app.layout = html.Div(
             [
                 dcc.Markdown(
                     """
-            このアプリケーションは[合同会社 長目](https://chomoku.com/)が作成しています。
+                    感染者数のデータは[stop-covid19-kyoto](https://github.com/stop-covid19-kyoto/covid19-kyoto)のものを利用しています。   
+                    ワクチンのデータは[京都市情報館](https://www.city.kyoto.lg.jp/hokenfukushi/page/0000280084.html#a1)のものを利用しています。   
+                    このアプリケーションは[合同会社 長目](https://chomoku.com/)が作成しています。    
             
             """
                 ),
