@@ -1,3 +1,4 @@
+from ast import parse
 from datetime import datetime
 from typing import List
 from requests_html import HTMLSession
@@ -55,16 +56,18 @@ if __name__ == "__main__":
 
     seshu = {"接種率": "1回目接種率", "接種率.1": "2回目接種率"}
 
-    old_num_df = pd.read_csv("./data/vaccined_num.csv")
-    old_for_df = pd.read_csv("./data/vac_forecast.csv")
+    old_num_df = pd.read_csv("./data/vaccined_num.csv", parse_dates=['date'])
+    old_for_df = pd.read_csv("./data/vac_forecast.csv", parse_dates=['date'])
 
     old_num_df = old_num_df.rename(seshu, axis=1)
     old_for_df = old_for_df.rename(seshu, axis=1)
 
     old_num_date = old_num_df['date'].max()
     old_for_date = old_for_df['date'].max()
+    print(old_num_date)
+    print(seshu_date)
     # データフレーム作成
-    if old_num_date != seshu_date:
+    if old_num_date != seshu_date and old_for_date != forecast_date:
         total_df = data[0]
         total_df["date"] = seshu_date
         total_df = total_df.rename({"Unnamed: 0": "年代"}, axis=1)
@@ -104,4 +107,5 @@ if __name__ == "__main__":
         new_num_df.to_csv("./data/vaccined_num.csv", index=None)
         new_for_df.to_csv("./data/vac_forecast.csv", index=None)
     else:
-        break
+        print('終了')
+        
