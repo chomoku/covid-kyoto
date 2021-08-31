@@ -55,47 +55,53 @@ if __name__ == "__main__":
 
     seshu = {"接種率": "1回目接種率", "接種率.1": "2回目接種率"}
 
-    # データフレーム作成
-
-    total_df = data[0]
-    total_df["date"] = seshu_date
-    total_df = total_df.rename({"Unnamed: 0": "年代"}, axis=1)
-    total_df = total_df.rename(seshu, axis=1)
-
-    aged_df = data[1]
-    aged_df["date"] = seshu_date
-    aged_df = aged_df.rename(seshu, axis=1)
-    vaccine_num_df = pd.concat([total_df, aged_df]).reset_index(drop=True)
-
-    for num, col in enumerate(vaccine_num_df.columns[1:-1]):
-        if num % 2 == 0:
-            vaccine_num_df[col] = vaccine_num_df[col].map(
-                lambda x: int(
-                    x.replace("\u3000回", "").replace("\u3000％", "").replace(",", "")
-                )
-            )
-        else:
-            vaccine_num_df[col] = vaccine_num_df[col].map(
-                lambda x: float(
-                    x.replace("\u3000回", "").replace("\u3000％", "").replace(",", "")
-                )
-            )
-
-    forecast_df = data[2]
-    forecast_df["date"] = forecast_date
-
-    forecast_df["配送数（予定を含む）"] = forecast_df["配送数（予定を含む）"].map(
-        lambda x: int(x.replace("\u3000回分", "").replace(",", "").replace("約", ""))
-    )
-
     old_num_df = pd.read_csv("./data/vaccined_num.csv")
     old_for_df = pd.read_csv("./data/vac_forecast.csv")
 
     old_num_df = old_num_df.rename(seshu, axis=1)
     old_for_df = old_for_df.rename(seshu, axis=1)
 
-    new_num_df = pd.concat([old_num_df, vaccine_num_df])
-    new_for_df = pd.concat([old_for_df, forecast_df])
+    old_num_date = old_num_df['date'].max()
+    old_for_date = old_for_df['date'].max()
+    # データフレーム作成
+    if old_num_date != seshu_date:
+        total_df = data[0]
+        total_df["date"] = seshu_date
+        total_df = total_df.rename({"Unnamed: 0": "年代"}, axis=1)
+        total_df = total_df.rename(seshu, axis=1)
 
-    new_num_df.to_csv("./data/vaccined_num.csv", index=None)
-    new_for_df.to_csv("./data/vac_forecast.csv", index=None)
+        aged_df = data[1]
+        aged_df["date"] = seshu_date
+        aged_df = aged_df.rename(seshu, axis=1)
+        vaccine_num_df = pd.concat([total_df, aged_df]).reset_index(drop=True)
+
+        for num, col in enumerate(vaccine_num_df.columns[1:-1]):
+            if num % 2 == 0:
+                vaccine_num_df[col] = vaccine_num_df[col].map(
+                    lambda x: int(
+                        x.replace("\u3000回", "").replace("\u3000％", "").replace(",", "")
+                    )
+                )
+            else:
+                vaccine_num_df[col] = vaccine_num_df[col].map(
+                    lambda x: float(
+                        x.replace("\u3000回", "").replace("\u3000％", "").replace(",", "")
+                    )
+                )
+
+        forecast_df = data[2]
+        forecast_df["date"] = forecast_date
+
+        forecast_df["配送数（予定を含む）"] = forecast_df["配送数（予定を含む）"].map(
+            lambda x: int(x.replace("\u3000回分", "").replace(",", "").replace("約", ""))
+        )
+
+
+
+        new_num_df = pd.concat([old_num_df, vaccine_num_df])
+        new_for_df = pd.concat([old_for_df, forecast_df])
+
+        new_num_df.to_csv("./data/vaccined_num.csv", index=None)
+        new_for_df.to_csv("./data/vac_forecast.csv", index=None)
+    else:
+        break
