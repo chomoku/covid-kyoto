@@ -183,6 +183,9 @@ contents = html.Div(
         ),
         html.Div(
             [
+                html.Div([
+                html.H2('ワクチン接種状況と見通し', style={'paddingTop': '3%'}, className='text-white bg-primary'),
+                ], style={'width': '70%', 'margin': 'auto'}),
                 html.Div(
                     [
                         dcc.Dropdown(
