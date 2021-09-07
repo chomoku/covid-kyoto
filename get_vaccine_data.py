@@ -1,6 +1,6 @@
 from ast import parse
 from datetime import datetime
-from typing import List
+from typing import List, Dict, Tuple
 from requests_html import HTMLSession
 import pandas as pd
 
@@ -25,6 +25,65 @@ def kyoto_text_to_date(text_block: List, text_num: int) -> str:
     vac_str = _wareki_to_datetime(vac_str)
     return vac_str
 
+def get_update_date(path):
+    session = HTMLSession()
+    r = session.get(path)
+    text_block = r.html.find('.mol_textblock')
+    date_list = list()
+    for num in range(len(text_block)):
+        date_list.append(kyoto_text_to_date(text_block, num))
+    date_list = [d for d in date_list if d]
+    seshu_date = date_list[0]
+    forecast_date = date_list[1]
+    return seshu_date, forecast_date
+
+
+def latest_csv(path: str) -> Tuple[datetime, pd.DataFrame]:
+    '''
+    Desc:
+        保有するCSVの日付とデータフレームを返す
+    Params:
+        path: str
+        csvのpath
+    Returns:
+        date_max: datetime
+        保有csvの最新の日付
+        df: pd.Dataframe
+        保有csvのデータフレーム
+    '''
+
+    df = pd.read_csv(path, parse_dates=['date'])
+    date_max = df['date'].max()
+    return date_max, df
+
+
+def vac_num_df_prepro(data: List, num: int, latest_date: datetime, seshu_dict: Dict = None) -> pd.DataFrame:
+    '''
+    desc:
+        pathにある目的のデータを取得するための関数
+
+    Params:
+        data: str
+        ページにあるデータフレームのリスト
+        num: int
+        ワクチン接種数のテーブルの掲載されている番号
+        現在:
+            0: 総数
+            1: 年代別
+        latest_date: datetime
+        データ取得日
+    Returns:
+        df: pd.DataFrame
+        取得されたデータフレーム
+    '''
+    
+    df = data[num]
+    df['date'] = latest_date
+    df = df.rename({'Unnamed: 0': '年代'}, axis=1)
+    if seshu_dict:
+        df = df.rename(seshu_dict, axis=1)
+    return df
+
 
 """
 もう少し使いやすくする必要性
@@ -36,48 +95,28 @@ def kyoto_text_to_date(text_block: List, text_num: int) -> str:
 """
 
 if __name__ == "__main__":
-    data = pd.read_html(
-        "https://www.city.kyoto.lg.jp/hokenfukushi/page/0000280084.html"
-    )
-    session = HTMLSession()
-    r = session.get("https://www.city.kyoto.lg.jp/hokenfukushi/page/0000280084.html")
-    text_block = r.html.find(".mol_textblock")
-
-    # データの日付作成
-
-    date_list = list()
-
-    for num in range(len(text_block)):
-        date_list.append(kyoto_text_to_date(text_block, num))
-
-    date_list = [d for d in date_list if d]
-    seshu_date = date_list[0]
-    forecast_date = date_list[1]
+    data_url = "https://www.city.kyoto.lg.jp/hokenfukushi/page/0000280084.html"
+    data = pd.read_html(data_url)
+    
+    seshu_date, forecast_date = get_update_date(data_url)
 
     seshu = {"接種率": "1回目接種率", "接種率.1": "2回目接種率"}
 
-    old_num_df = pd.read_csv("./data/vaccined_num.csv", parse_dates=['date'])
-    old_for_df = pd.read_csv("./data/vac_forecast.csv", parse_dates=['date'])
+    # 自分の持つデータを読み込み、データ更新の最新日を取得
+    vac_num_path = "./data/vaccined_num.csv"
+    vac_forecast_path = "./data/vac_forecast.csv"
 
-    old_num_df = old_num_df.rename(seshu, axis=1)
-    old_for_df = old_for_df.rename(seshu, axis=1)
+    old_num_date, old_num_df = latest_csv(vac_num_path)
+    old_for_date, old_for_df = latest_csv(vac_forecast_path)
 
-    old_num_date = old_num_df['date'].max()
-    old_for_date = old_for_df['date'].max()
-    print(old_num_date)
-    print(seshu_date)
-    # データフレーム作成
-    if old_num_date != seshu_date and old_for_date != forecast_date:
-        total_df = data[0]
-        total_df["date"] = seshu_date
-        total_df = total_df.rename({"Unnamed: 0": "年代"}, axis=1)
-        total_df = total_df.rename(seshu, axis=1)
+    # まずは数値データ分を作成する
 
-        aged_df = data[1]
-        aged_df["date"] = seshu_date
-        aged_df = aged_df.rename(seshu, axis=1)
+    data = pd.read_html(data_url)
+
+    if old_num_date != seshu_date:
+        total_df = vac_num_df_prepro(data, 0, seshu_date, seshu)
+        aged_df = vac_num_df_prepro(data, 1, seshu_date, seshu)
         vaccine_num_df = pd.concat([total_df, aged_df]).reset_index(drop=True)
-
         for num, col in enumerate(vaccine_num_df.columns[1:-1]):
             if num % 2 == 0:
                 vaccine_num_df[col] = vaccine_num_df[col].map(
@@ -89,23 +128,27 @@ if __name__ == "__main__":
                 vaccine_num_df[col] = vaccine_num_df[col].map(
                     lambda x: float(
                         x.replace("\u3000回", "").replace("\u3000％", "").replace(",", "")
-                    )
+                   )
                 )
+    else:
+        print('接種者数は更新されていませんでした')
 
-        forecast_df = data[2]
-        forecast_df["date"] = forecast_date
+    new_num_df = pd.concat([old_num_df, vaccine_num_df])
 
+
+
+    if old_for_date != forecast_date:
+        forecast_df = vac_num_df_prepro(data, 2, forecast_date)
         forecast_df["配送数（予定を含む）"] = forecast_df["配送数（予定を含む）"].map(
             lambda x: int(x.replace("\u3000回分", "").replace(",", "").replace("約", ""))
         )
 
-
-
-        new_num_df = pd.concat([old_num_df, vaccine_num_df])
-        new_for_df = pd.concat([old_for_df, forecast_df])
-
-        new_num_df.to_csv("./data/vaccined_num.csv", index=None)
-        new_for_df.to_csv("./data/vac_forecast.csv", index=None)
+        print(forecast_df)
     else:
-        print('終了')
+        print('配送数は更新されていませんでした')
+
+    new_for_df = pd.concat([old_for_df, forecast_df])
+
+    new_num_df.to_csv("./data/vaccined_num.csv", index=None)
+    new_for_df.to_csv("./data/vac_forecast.csv", index=None)
         
