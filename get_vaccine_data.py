@@ -1,4 +1,3 @@
-from ast import parse
 from datetime import datetime
 from typing import List, Dict, Tuple
 from requests_html import HTMLSession
@@ -84,16 +83,6 @@ def vac_num_df_prepro(data: List, num: int, latest_date: datetime, seshu_dict: D
         df = df.rename(seshu_dict, axis=1)
     return df
 
-
-"""
-もう少し使いやすくする必要性
-問題: 日付の位置が動いてしまう
-どうやって探すか？
-総当たりして、リストに格納、Noneをはじくとか？
-作業を並列に行うと、修正などが難しい。
-1つの作業は一つの塊で扱う。
-"""
-
 if __name__ == "__main__":
     data_url = "https://www.city.kyoto.lg.jp/hokenfukushi/page/0000280084.html"
     data = pd.read_html(data_url)
@@ -143,7 +132,6 @@ if __name__ == "__main__":
             lambda x: int(x.replace("\u3000回分", "").replace(",", "").replace("約", ""))
         )
 
-        print(forecast_df)
     else:
         print('配送数は更新されていませんでした')
 
