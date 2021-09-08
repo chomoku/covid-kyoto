@@ -24,10 +24,11 @@ def kyoto_text_to_date(text_block: List, text_num: int) -> str:
     vac_str = _wareki_to_datetime(vac_str)
     return vac_str
 
+
 def get_update_date(path):
     session = HTMLSession()
     r = session.get(path)
-    text_block = r.html.find('.mol_textblock')
+    text_block = r.html.find(".mol_textblock")
     date_list = list()
     for num in range(len(text_block)):
         date_list.append(kyoto_text_to_date(text_block, num))
@@ -38,7 +39,7 @@ def get_update_date(path):
 
 
 def latest_csv(path: str) -> Tuple[datetime, pd.DataFrame]:
-    '''
+    """
     Desc:
         保有するCSVの日付とデータフレームを返す
     Params:
@@ -49,15 +50,17 @@ def latest_csv(path: str) -> Tuple[datetime, pd.DataFrame]:
         保有csvの最新の日付
         df: pd.Dataframe
         保有csvのデータフレーム
-    '''
+    """
 
-    df = pd.read_csv(path, parse_dates=['date'])
-    date_max = df['date'].max()
+    df = pd.read_csv(path, parse_dates=["date"])
+    date_max = df["date"].max()
     return date_max, df
 
 
-def vac_num_df_prepro(data: List, num: int, latest_date: datetime, seshu_dict: Dict = None) -> pd.DataFrame:
-    '''
+def vac_num_df_prepro(
+    data: List, num: int, latest_date: datetime, seshu_dict: Dict = None
+) -> pd.DataFrame:
+    """
     desc:
         pathにある目的のデータを取得するための関数
 
@@ -74,19 +77,20 @@ def vac_num_df_prepro(data: List, num: int, latest_date: datetime, seshu_dict: D
     Returns:
         df: pd.DataFrame
         取得されたデータフレーム
-    '''
-    
+    """
+
     df = data[num]
-    df['date'] = latest_date
-    df = df.rename({'Unnamed: 0': '年代'}, axis=1)
+    df["date"] = latest_date
+    df = df.rename({"Unnamed: 0": "年代"}, axis=1)
     if seshu_dict:
         df = df.rename(seshu_dict, axis=1)
     return df
 
+
 if __name__ == "__main__":
     data_url = "https://www.city.kyoto.lg.jp/hokenfukushi/page/0000280084.html"
     data = pd.read_html(data_url)
-    
+
     seshu_date, forecast_date = get_update_date(data_url)
 
     seshu = {"接種率": "1回目接種率", "接種率.1": "2回目接種率"}
@@ -117,14 +121,12 @@ if __name__ == "__main__":
                 vaccine_num_df[col] = vaccine_num_df[col].map(
                     lambda x: float(
                         x.replace("\u3000回", "").replace("\u3000％", "").replace(",", "")
-                   )
+                    )
                 )
     else:
-        print('接種者数は更新されていませんでした')
+        print("接種者数は更新されていませんでした")
 
     new_num_df = pd.concat([old_num_df, vaccine_num_df])
-
-
 
     if old_for_date != forecast_date:
         forecast_df = vac_num_df_prepro(data, 2, forecast_date)
@@ -133,10 +135,9 @@ if __name__ == "__main__":
         )
 
     else:
-        print('配送数は更新されていませんでした')
+        print("配送数は更新されていませんでした")
 
     new_for_df = pd.concat([old_for_df, forecast_df])
 
     new_num_df.to_csv("./data/vaccined_num.csv", index=None)
     new_for_df.to_csv("./data/vac_forecast.csv", index=None)
-        
