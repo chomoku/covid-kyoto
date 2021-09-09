@@ -20,6 +20,7 @@ jobs:
           python -m pip install pip -U
           pip install pandas
           pip install requests
+          pip install requests_html
 
       - name: run python
         run: |
