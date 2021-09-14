@@ -127,6 +127,7 @@ if __name__ == "__main__":
         print("接種者数は更新されていませんでした")
 
     new_num_df = pd.concat([old_num_df, vaccine_num_df])
+    new_num_df.to_csv("./data/vaccined_num.csv", index=None)
 
     if old_for_date != forecast_date:
         forecast_df = vac_num_df_prepro(data, 2, forecast_date)
@@ -139,5 +140,4 @@ if __name__ == "__main__":
 
     new_for_df = pd.concat([old_for_df, forecast_df])
 
-    new_num_df.to_csv("./data/vaccined_num.csv", index=None)
     new_for_df.to_csv("./data/vac_forecast.csv", index=None)

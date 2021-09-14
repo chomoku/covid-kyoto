@@ -101,14 +101,17 @@ def recent_pcr_bar(
 new_fig = draw_circle(new_counts, new_total, new_date)
 
 deliv_data = pd.read_csv("./data/vac_forecast.csv")
-latest_deliv_date = max(deliv_data['date'])
+latest_deliv_date = max(deliv_data["date"])
 deliv_graph = recent_pcr_bar(
-    deliv_data, x_axis_name="配送期間", y_axis_name="配送数（予定を含む）", title=f"ワクチン配送数: （{latest_deliv_date}時点）"
+    deliv_data,
+    x_axis_name="配送期間",
+    y_axis_name="配送数（予定を含む）",
+    title=f"ワクチン配送数: （{latest_deliv_date}時点）",
 )
 
 
 seshu_data = pd.read_csv("./data/vaccined_num.csv")
-latest_seshu_date = max(seshu_data['date'])
+latest_seshu_date = max(seshu_data["date"])
 
 app = dash.Dash(
     __name__,
