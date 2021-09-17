@@ -167,6 +167,7 @@ def update_data(data_path: str, page_url: str, selected_num: int) -> None:
         new_data = new_data.sort_values('date')
         new_data = new_data.reset_index(drop=True)
         new_data.to_csv("./data/kyoto_covid_patient.csv", index=None)
+        new_data[['date', 'age']].to_csv('./data/kyoto_covid2.csv', index=None)
         print("done!")
     else:
         print("Not Yet!")
