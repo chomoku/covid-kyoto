@@ -54,7 +54,7 @@ def cal_counts(df: pd.DataFrame, selected_date: datetime) -> pd.DataFrame:
     return counts, total
 
 
-df = pd.read_csv("data/kyoto_covid_patient.csv", parse_dates=["date"])
+df = pd.read_csv("data/kyoto_covid2.csv", parse_dates=["date"])
 new_date = df["date"].max()
 min_date = df["date"].min()
 new_counts, new_total = cal_counts(df, new_date)
