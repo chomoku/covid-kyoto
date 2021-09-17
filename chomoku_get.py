@@ -164,7 +164,9 @@ def update_data(data_path: str, page_url: str, selected_num: int) -> None:
         and master_date != base_data_latest_date
     ):
         new_data = page_df.merge(base_data, on=list(base_data.columns), how='outer')
-        new_data.to_csv("./data/kyoto_covid_patient.csv")
+        new_data = new_data.sort_values('date')
+        new_data = new_data.reset_index(drop=True)
+        new_data.to_csv("./data/kyoto_covid_patient.csv", index=None)
         print("done!")
     else:
         print("Not Yet!")
