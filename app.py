@@ -54,7 +54,7 @@ def cal_counts(df: pd.DataFrame, selected_date: datetime) -> pd.DataFrame:
     return counts, total
 
 
-df = pd.read_csv("data/kyoto_patients.csv", parse_dates=["date"])
+df = pd.read_csv("data/kyoto_covid_patient.csv", parse_dates=["date"])
 new_date = df["date"].max()
 min_date = df["date"].min()
 new_counts, new_total = cal_counts(df, new_date)
@@ -88,13 +88,16 @@ def draw_line(df):
     return aged_fig
 
 
-def recent_pcr_bar(
-    df: pd.DataFrame, x_axis_name: str, y_axis_name: str, title: str = None
+def recent_pcr_graph(
+    df: pd.DataFrame, x_axis_name: str, y_axis_name: str, title: str = None, selector: str = 'bar'
 ) -> go.Figure:
     recent_date = df["date"].max()
     graph_df = df[df["date"] == recent_date]
-    fig = px.bar(graph_df, x=x_axis_name, y=y_axis_name, title=title, height=450)
-    fig.update_layout(margin=dict(l=20, r=20, t=40, b=20),)
+    if selector == 'bar':
+        fig = px.bar(graph_df, x=x_axis_name, y=y_axis_name, title=title, height=450)
+    elif selector=='line':
+        fig = px.line(df, x=x_axis_name, y=y_axis_name, title=title, color='年代')
+    fig.update_layout(margin=dict(l=20, r=20, t=100, b=20),)
     return fig
 
 
@@ -102,7 +105,7 @@ new_fig = draw_circle(new_counts, new_total, new_date)
 
 deliv_data = pd.read_csv("./data/vac_forecast.csv")
 latest_deliv_date = max(deliv_data['date'])
-deliv_graph = recent_pcr_bar(
+deliv_graph = recent_pcr_graph(
     deliv_data, x_axis_name="配送期間", y_axis_name="配送数（予定を含む）", title=f"ワクチン配送数: （{latest_deliv_date}時点）"
 )
 
@@ -207,13 +210,17 @@ contents = html.Div(
                             style={"width": "80%", "margin": "auto"},
                         ),
                         dcc.Graph(id="seshu_graph"),
+                        
                     ],
                     className="pcr_data",
                 ),
-                html.Div([dcc.Graph(figure=deliv_graph)], className="pcr_data"),
+                dcc.Graph(id='seshu_line', className='pcr_data'),
             ],
             className="first-parent",
         ),
+        html.Div([
+            html.Div([dcc.Graph(figure=deliv_graph)], className="pcr_data"),
+        ], className='first-parent')
     ]
 )
 
@@ -240,7 +247,7 @@ app.layout = html.Div(
             [
                 dcc.Markdown(
                     """
-                    感染者数のデータは[stop-covid19-kyoto](https://github.com/stop-covid19-kyoto/covid19-kyoto)のものを利用しています。   
+                    感染者数のデータは[京都府の府内の感染状況](https://www.pref.kyoto.jp/kentai/corona/hassei1-50.html)のものを利用しています。   
                     ワクチンのデータは[京都市情報館](https://www.city.kyoto.lg.jp/hokenfukushi/page/0000280084.html#a1)のものを利用しています。   
                     このアプリケーションは[合同会社 長目](https://chomoku.com/)が作成しています。    
             
@@ -275,15 +282,22 @@ def update_line(selected_ages):
     return draw_line(sel_df)
 
 
-@app.callback(Output("seshu_graph", "figure"), Input("num_select", "value"))
+@app.callback(Output("seshu_graph", "figure"), Output('seshu_line', 'figure'), Input("num_select", "value"))
 def update_seshu_graph(selected_value):
-    fig = recent_pcr_bar(
+    fig = recent_pcr_graph(
         seshu_data,
         x_axis_name="年代",
         y_axis_name=selected_value,
         title=f"年代別接種率({selected_value}: {latest_seshu_date}時点)",
     )
-    return fig
+    fig2 = recent_pcr_graph(
+        seshu_data,
+        x_axis_name='date',
+        y_axis_name=selected_value,
+        title=f"年代別接種率({selected_value}: 時系列)",
+        selector='line'
+    )
+    return fig, fig2
 
 
 if __name__ == "__main__":
