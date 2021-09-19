@@ -19,7 +19,7 @@ def draw_circle(df: pd.DataFrame, total: int, today: str) -> go.Figure:
     年代別患者数の円グラフを作成する関数
     """
     fig = go.Figure()
-    circle_size = 150 + total / 1.5
+    circle_size = 500
     fig.add_trace(
         go.Pie(
             labels=df["age"], values=df["counts"], textinfo="label+percent", hole=0.7
@@ -65,8 +65,8 @@ aged_df.columns = ["counts"]
 aged_df = aged_df.reset_index()
 
 
-def draw_line(df):
-    aged_fig = px.line(df, x="date", y="counts", color="age")
+def draw_line(df: pd.DataFrame, graph_type = px.line, color='age'):
+    aged_fig = graph_type(df, x="date", y="counts", color=color)
     aged_fig.update_layout(
         xaxis=dict(
             rangeselector=dict(
@@ -87,6 +87,8 @@ def draw_line(df):
     )
     return aged_fig
 
+all_df = aged_df.groupby('date', as_index=False).sum()
+total_graph = draw_line(all_df, graph_type=px.bar, color=None)
 
 def recent_pcr_graph(
     df: pd.DataFrame, x_axis_name: str, y_axis_name: str, title: str = None, selector: str = 'bar'
@@ -171,6 +173,15 @@ contents = html.Div(
                 ),
             ],
         ),
+        html.Div([
+            
+            html.H3('合計感染者数（1日あたり）'),
+            dcc.Graph(figure=total_graph)
+            
+            ],
+            className="time_series",
+            style={"padding": "3%"}
+            ),
         html.Div(
             [
                 html.H3("年齢別感染者数（時系列）"),
@@ -199,9 +210,8 @@ contents = html.Div(
                     ],
                     style={"width": "70%", "margin": "auto"},
                 ),
-                html.Div(
-                    [
-                        dcc.Dropdown(
+
+                    dcc.Dropdown(
                             id="num_select",
                             options=[
                                 {"value": s, "label": s} for s in ["1回目接種率", "2回目接種率"]
@@ -209,6 +219,9 @@ contents = html.Div(
                             value="2回目接種率",
                             style={"width": "80%", "margin": "auto"},
                         ),
+                html.Div(
+                    [
+                        
                         dcc.Graph(id="seshu_graph"),
                         
                     ],
