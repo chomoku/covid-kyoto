@@ -83,50 +83,56 @@ def _latest_data_desc(page_url: str) -> Tuple[datetime, int]:
 
     return master_date, master_count
 
+
 # リンクの数値を取得する関数
 
+
 def _get_hassei_url(select_num: int) -> List:
-    '''
+    """
      京都の感染バックナンバーのURLを取得する
      Params:
         select_num: 取得するバックナンバーURLの数
      Returns:
         link_list: select_numで指定された数のURLのリスト
-    '''
-    hassei_bn_url = 'https://www.pref.kyoto.jp/kentai/corona/hassei-bn.html'
+    """
+    hassei_bn_url = "https://www.pref.kyoto.jp/kentai/corona/hassei-bn.html"
     session = HTMLSession()
     r = session.get(hassei_bn_url)
     links = r.html.absolute_links
-    link_list = [link for link in links if re.search('hassei', link)] #バックナンバーのURLを格納
-    link_list = [link.split('hassei')[1].split('.')[0] for link in link_list] # バックナンバーの番号部分をリストに格納
-    r = re.compile('^[0-9]+$')
+    link_list = [link for link in links if re.search("hassei", link)]  # バックナンバーのURLを格納
+    link_list = [
+        link.split("hassei")[1].split(".")[0] for link in link_list
+    ]  # バックナンバーの番号部分をリストに格納
+    r = re.compile("^[0-9]+$")
     num_list = [int(num) for num in filter(r.match, link_list)]
     num_list = sorted(num_list)
     num_list = num_list[-select_num:]
-    link_list = [f'https://www.pref.kyoto.jp/kentai/corona/hassei{i}.html' for i in num_list]
+    link_list = [
+        f"https://www.pref.kyoto.jp/kentai/corona/hassei{i}.html" for i in num_list
+    ]
     return link_list
 
 
 def get_data(selected_num: int) -> pd.DataFrame:
-    '''
+    """
      バックナンバーをselected_numで指定した分と、1-50にあるデータを取得する
      関数。
      Params:
         selected_num: バックナンバーの数を指定する
      Returns:
         data: バックナンバー＋最新のデータを持つ
-    '''
+    """
     link_list = _get_hassei_url(selected_num)
     data = pd.DataFrame()
     for link in link_list:
         df = pd.read_html(link)[0]
-        df = df[df['発表日'] != "（欠番）"]
+        df = df[df["発表日"] != "（欠番）"]
         df = _rename_data(df)
         data = pd.concat([data, df])
         time.sleep(2)
-    df = pd.read_html('https://www.pref.kyoto.jp/kentai/corona/hassei1-50.html')[1]
+    df = pd.read_html("https://www.pref.kyoto.jp/kentai/corona/hassei1-50.html")[1]
     df = _rename_data(df)
-    df = df[df['発表日'] != "（欠番）"]
+    df = df[df["発表日"] != "（欠番）"]
     data = pd.concat([data, df])
     data = data.reset_index(drop=True)
     data = data.sort_values("date")
@@ -138,6 +144,7 @@ def _rename_data(df):
     df["date"] = df["発表日"].map(_wareki_to_datetime)
     df["age"] = df["年代"].map(replace_dict)
     return df
+
 
 def update_data(data_path: str, page_url: str, selected_num: int) -> None:
     """
@@ -157,17 +164,17 @@ def update_data(data_path: str, page_url: str, selected_num: int) -> None:
     base_data = pd.read_csv(data_path, index_col=0, parse_dates=["date"])  # 保有するデータ
     base_data_latest_date = max(base_data["date"])
     master_date, master_count = _latest_data_desc(page_url)
-    print(f'{master_date} / {master_count}/ {page_latest_date} / {latest_data_num}')
+    print(f"{master_date} / {master_count}/ {page_latest_date} / {latest_data_num}")
     if (
         master_date == page_latest_date
         and latest_data_num == master_count
         and master_date != base_data_latest_date
     ):
-        new_data = page_df.merge(base_data, on=list(base_data.columns), how='outer')
-        new_data = new_data.sort_values('date')
+        new_data = page_df.merge(base_data, on=list(base_data.columns), how="outer")
+        new_data = new_data.sort_values("date")
         new_data = new_data.reset_index(drop=True)
         new_data.to_csv("./data/kyoto_covid_patient.csv", index=None)
-        new_data[['date', 'age']].to_csv('./data/kyoto_covid2.csv', index=None)
+        new_data[["date", "age"]].to_csv("./data/kyoto_covid2.csv", index=None)
         print("done!")
     else:
         print("Not Yet!")
