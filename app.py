@@ -19,7 +19,7 @@ def draw_circle(df: pd.DataFrame, total: int, today: str) -> go.Figure:
     年代別患者数の円グラフを作成する関数
     """
     fig = go.Figure()
-    circle_size = 500
+    circle_size = 400
     fig.add_trace(
         go.Pie(
             labels=df["age"], values=df["counts"], textinfo="label+percent", hole=0.7
@@ -88,7 +88,7 @@ def draw_line(df: pd.DataFrame, graph_type = px.line, color='age'):
     return aged_fig
 
 all_df = aged_df.groupby('date', as_index=False).sum()
-total_graph = draw_line(all_df, graph_type=px.bar, color=None)
+total_graph = draw_line(all_df, graph_type=px.line, color=None)
 
 def recent_pcr_graph(
     df: pd.DataFrame, x_axis_name: str, y_axis_name: str, title: str = None, selector: str = 'bar'
