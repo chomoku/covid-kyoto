@@ -54,7 +54,7 @@ def cal_counts(df: pd.DataFrame, selected_date: datetime) -> pd.DataFrame:
     return counts, total
 
 
-df = pd.read_csv("data/kyoto_covid2.csv", parse_dates=["date"])
+df = pd.read_csv("data/kyoto_patients.csv", parse_dates=["date"], index_col=0)
 new_date = df["date"].max()
 min_date = df["date"].min()
 new_counts, new_total = cal_counts(df, new_date)
@@ -87,7 +87,9 @@ def draw_line(df: pd.DataFrame, graph_type = px.line, color='age'):
     )
     return aged_fig
 
-all_df = aged_df.groupby('date', as_index=False).sum()
+all_df = pd.DataFrame(df[['date', 'age']].groupby('date').size())
+all_df.columns = ['counts']
+all_df = all_df.reset_index()
 total_graph = draw_line(all_df, graph_type=px.line, color=None)
 
 def recent_pcr_graph(
@@ -260,7 +262,7 @@ app.layout = html.Div(
             [
                 dcc.Markdown(
                     """
-                    感染者数のデータは[京都府の府内の感染状況](https://www.pref.kyoto.jp/kentai/corona/hassei1-50.html)のものを利用しています。   
+                    感染者数のデータは[京都府の府内の新型コロナウィルス感染症対策サイト](https://kyoto.stopcovid19.jp/)のものを利用しています。   
                     ワクチンのデータは[京都市情報館](https://www.city.kyoto.lg.jp/hokenfukushi/page/0000280084.html#a1)のものを利用しています。   
                     このアプリケーションは[合同会社 長目](https://chomoku.com/)が作成しています。    
             
