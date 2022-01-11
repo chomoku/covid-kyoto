@@ -233,9 +233,9 @@ contents = html.Div(
         #     ],
         #     className="first-parent",
         # ),
-        html.Div([
-            html.Div([dcc.Graph(figure=deliv_graph)], className="pcr_data"),
-        ], className='first-parent')
+        # html.Div([
+        #     html.Div([dcc.Graph(figure=deliv_graph)], className="pcr_data"),
+        # ], className='first-parent')
     ]
 )
 
