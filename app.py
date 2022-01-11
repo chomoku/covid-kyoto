@@ -200,39 +200,39 @@ contents = html.Div(
             className="time_series",
             style={"padding": "3%"},
         ),
-        html.Div(
-            [
-                html.Div(
-                    [
-                        html.H2(
-                            "ワクチン接種状況と見通し",
-                            style={"paddingTop": "3%"},
-                            className="text-white bg-primary",
-                        ),
-                    ],
-                    style={"width": "70%", "margin": "auto"},
-                ),
+        # html.Div(
+        #     [
+        #         html.Div(
+        #             [
+        #                 html.H2(
+        #                     "ワクチン接種状況と見通し",
+        #                     style={"paddingTop": "3%"},
+        #                     className="text-white bg-primary",
+        #                 ),
+        #             ],
+        #             style={"width": "70%", "margin": "auto"},
+        #         ),
 
-                    dcc.Dropdown(
-                            id="num_select",
-                            options=[
-                                {"value": s, "label": s} for s in ["1回目接種率", "2回目接種率"]
-                            ],
-                            value="2回目接種率",
-                            style={"width": "80%", "margin": "auto"},
-                        ),
-                html.Div(
-                    [
+        #             dcc.Dropdown(
+        #                     id="num_select",
+        #                     options=[
+        #                         {"value": s, "label": s} for s in ["1回目接種率", "2回目接種率"]
+        #                     ],
+        #                     value="2回目接種率",
+        #                     style={"width": "80%", "margin": "auto"},
+        #                 ),
+        #         html.Div(
+        #             [
                         
-                        dcc.Graph(id="seshu_graph"),
+        #                 dcc.Graph(id="seshu_graph"),
                         
-                    ],
-                    className="pcr_data",
-                ),
-                dcc.Graph(id='seshu_line', className='pcr_data'),
-            ],
-            className="first-parent",
-        ),
+        #             ],
+        #             className="pcr_data",
+        #         ),
+        #         dcc.Graph(id='seshu_line', className='pcr_data'),
+        #     ],
+        #     className="first-parent",
+        # ),
         html.Div([
             html.Div([dcc.Graph(figure=deliv_graph)], className="pcr_data"),
         ], className='first-parent')
